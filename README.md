@@ -6,7 +6,7 @@ This project based workshop will go through the entire Physical Design ASIC flow
 ## Table of Contents
 
 - [Day-1 - Inception and Introduction to open-source EDA tools, OpenLane flow and SKY130 PDK](#day1)
-- Day-2 - Good floorplan vs bad floorplan and a brief introduction to library cells
-- Day-3 - Designing library cell using Magic layout tool and characterization using ngspice
-- Day-4 - Pre-layout timing analysis and the importance of good clock tree network
-- Day-5 - Final steps of RTL2GDS flow using tritonRoute and openSTA
+- [Day-2 - Good floorplan vs bad floorplan and a brief introduction to library cells](#day2)
+- [Day-3 - Designing library cell using Magic layout tool and characterization using ngspice](#day3)
+- [Day-4 - Pre-layout timing analysis and the importance of good clock tree network](#day4)
+- [Day-5 - Final steps of RTL2GDS flow using tritonRoute and openSTA](#day5)
