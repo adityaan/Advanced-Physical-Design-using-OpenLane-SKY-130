@@ -90,7 +90,7 @@ If we look further into *sky130A* folder, we see two folders, *libs.ref* and *li
 The pdk that would be used in this workshop would be *sky_fd_sc_hd*. As can be seen in the above screenshot, the folder consists of all the necessary data in order to run the physical design flow. Next, we will explore the *openlane* folder which would be used to invoke the tools and run the entire flow.
 
 
-#### - Running the OpenLane flow <a name="dir"></a>
+#### - Running the OpenLane flow <a name="run"></a>
 
 ![a](https://user-images.githubusercontent.com/22279620/155466093-2f0d5b8d-f226-4938-867a-cf2d3e3fc526.PNG)
 
