@@ -6,10 +6,13 @@ This project based workshop will go through the entire Physical Design ASIC flow
 ## Table of Contents
 
 - [Day-1 - Inception and Introduction to open-source EDA tools, OpenLane flow and SKY130 PDK](#day1)
-  - [Introduction to QFN-48 package, processor, pads, core, die and IPs](#intro)
+  - [Talking to Computers](#intro)
     - [QN-48 Package Overview](#qn)
     - [Dive into the Core](#core)
     - [Journey from Cool Applications to Silicon](#sili)
+  - [SoC design and Introduction to OpenLane flow](#soc)
+    - [Simplified RTL to GDSII flow](#rtl)
+    - [Introduction to OpenLane flow](#open)
 - [Day-2 - Good floorplan vs bad floorplan and a brief introduction to library cells](#day2)
 - [Day-3 - Designing library cell using Magic layout tool and characterization using ngspice](#day3)
 - [Day-4 - Pre-layout timing analysis and the importance of good clock tree network](#day4)
@@ -20,7 +23,7 @@ This project based workshop will go through the entire Physical Design ASIC flow
 
 ## Day-1 - Inception and Introduction to open-source EDA tools, OpenLane flow and SKY130 PDK <a name="day1"></a>
 
-### Introduction to QFN-48 package, processor, pads, core, die and IPs <a name="intro"></a>
+### Talking to Computers <a name="intro"></a>
 
 #### - QFN-48 Package Overview <a name="qn"></a>
 ![a](https://user-images.githubusercontent.com/22279620/155399202-68da56cf-7b09-4ad0-9230-69b7e830e71d.PNG)
@@ -45,3 +48,14 @@ All the applications that we use in our day-to-day lives to help us complete tas
 
 
 In order to implement hardware that can understand instructions for a given instruction set architecture (ISA), we need a hardware description language (HDL) language that can be used to implement the necessary hardware at the register transfer level (RTL). This hardware level description of the hardware is then coverted into gate level netlist during the synthesis process. The optimized netlist that is obtained at the the end of the process is then layed out on actual silicon through the physical design flow.
+
+
+### SoC design and Introduction to OpenLane flow
+
+#### - Simplified RTL to GDSII flow <a = "rtl"></a>
+
+![a](https://user-images.githubusercontent.com/22279620/155433501-be196d6a-738f-492a-9e52-ab3caf9f9dd4.PNG)
+
+The above images describes all the important steps in the Physical Design with some intermediate steps not mentioned for simplicity. It starts with the RTL file provided as an input to Synthesis where the given RTL code gets converted into technology dependent gate level netlist. The gate level netlist is used to perform floorplanning and powerplanning. During floorplanning, the macros and IP's are placed in their respective locations after considering factors, placement of pins on the periphery of the chip and the placement of IO pads. Powerplanning involves the creation of power and ground structure around the chip and across the core area. Usually, the power is distributed across the chip in a mesh structure to reduce IR drop and electromigation issues. The placement stage deals with the placement of standard cells in the core area and other steps such as high fanout net synthesis, tie cell insertion etc. During the clock tree synthesis stage, clock buffers and inverters are placed along the clock path to balance the skew and latency of the clock across the design. The routing stage involves the routing of data signals across the design while making sure that there is minimum congestion issues. The final stae involves signing off the design. This involves making sure that the design doesn't have any timing violations and the design is DRC and LVS clean. At the end of this step, the GDSII file is being generated which is sent to the foundry for tape out.
+
+#### - Introduction to OpenLane flow <a ="open"></a>
