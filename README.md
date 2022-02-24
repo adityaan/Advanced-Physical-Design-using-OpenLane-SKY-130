@@ -13,6 +13,9 @@ This project based workshop will go through the entire Physical Design ASIC flow
   - [SoC design and Introduction to OpenLane flow](#soc)
     - [Simplified RTL to GDSII flow](#rtl)
     - [Introduction to OpenLane flow](#open)
+  - [Exploring Open Source EDA tools](#opensource)
+    - [Overview of OpenLane Directory Structure](#dir)
+    - [Running the OpenLane flow](#run)
 - [Day-2 - Good floorplan vs bad floorplan and a brief introduction to library cells](#day2)
 - [Day-3 - Designing library cell using Magic layout tool and characterization using ngspice](#day3)
 - [Day-4 - Pre-layout timing analysis and the importance of good clock tree network](#day4)
@@ -63,3 +66,60 @@ The above images describes all the important steps in the Physical Design with s
 ![a](https://user-images.githubusercontent.com/22279620/155448151-19c743bb-7241-4334-b62b-8445e80d29d7.PNG)
 
 The OpenLane flow is an automated open source RTL to GDSII flow. It makes use of the Skywater 130 nm PDK and uses several opn source tools such as OpenRoad, Yosys, Fault, QFlow, OpenSTA and many others. It starts with the synthesis and optimization of RTL design netlist using Yosys and abc. Designrs could also make use of the Synthesis/Design Exploration tool that graphs the delay vs area for a given design using different strategies and gives designers the choice to choose based on their requirements. It also sweeps the design across different design metrics resulting in different runtime, cell count and other important design parameters to choose from. Design exploration also supports regression testing that compares the design to the best known designs and can help in choosing the right design. After synthesis, OpenLane also supports design for test (DFT) as it supports scan chain insertion, automatic test pattern generation (ATPG), test pattern compaction, fault coverage and fault simulation. The core PnR activities are run using the OpenROAD App from floorplanning to global routing. The flow also supports logic equivalence check using Yosys and detailed routing using TritonRoute. Physical verification is perfomed using magic and netgen and timing closure/sign off is achieved using OpenSTA. Finally, the GDSII data file is generated at the end of the flow.
+
+### Exploring Open Source EDA tools <a name="opensource"></a>
+
+#### - OpenLane and PDK Directory Structure <a name="dir"></a>
+
+The OpenLane directory consists of all the necessary files and scripts that is required in order to run the automated RTL to GDSII flow. All the files as part of the flow are open source and can be accessed via GitHub. Below mentioned steps assumes that the Linux system has the necessary files installed needed to run the flow.
+
+![a](https://user-images.githubusercontent.com/22279620/155455085-7da1b305-c36c-4057-9788-efa1ffa836cc.PNG)
+
+As can be seen in the above screenshot, the openlane working directory consists of two folders, *openlane* and *pdks*. First, we will focus on the pdks folder and explore it's contents.
+
+![a](https://user-images.githubusercontent.com/22279620/155459313-65e537b1-d35c-4c01-b207-18f0883774cf.PNG)
+
+The *pdks* folder consists of *open_pdks*, *sky130A* and *skywater-pdk* folders. The *skywater-pdk* consists of all the pdk related files such as cell and tech lef, timing library files and the necessary scripts. The *open_pdks* folder consists of the necessry files that are needed to get the skywater pdk files to work with the open source EDA tools as the pdk files are designed to originally work with commercial EDA tools. The *sky130A* pdk folder consists of the pdk files that can be used with the available open source EDA tools.
+
+![a](https://user-images.githubusercontent.com/22279620/155461969-9277fe95-9feb-4052-bd0e-247535f6d0f3.PNG)
+
+If we look further into *sky130A* folder, we see two folders, *libs.ref* and *libs.tech*. The *libs.ref* folder consists of technology specific files such as the lef, libs and other technolgy files whereas the *libs.tech* consists of tool specific files. As can be seen in the screenshot, the *libs.tech* folder consists of multiple sub folders belonging to various tools and they contain files specific to those tools.
+
+![a](https://user-images.githubusercontent.com/22279620/155462720-9028bec2-55cb-485b-ba88-a4753c34a2d3.PNG)
+
+The pdk that would be used in this workshop would be *sky_fd_sc_hd*. As can be seen in the above screenshot, the folder consists of all the necessary data in order to run the physical design flow. Next, we will explore the *openlane* folder which would be used to invoke the tools and run the entire flow.
+
+
+#### - Running the OpenLane flow <a name="dir"></a>
+
+![a](https://user-images.githubusercontent.com/22279620/155466093-2f0d5b8d-f226-4938-867a-cf2d3e3fc526.PNG)
+
+The *openlane* folder contains all the necessary scripts and other files to run the automated flow and flow should be invoked from thsi folder to run successfully. To run the flow, we can source the *flow.tcl* script as follows:
+
+              ./flow.tcl -interactive
+
+Sourcing the *flow.tcl* file would run the entire flow from start to end. Running it using the *-interactive* switch runs the flow one step at a time and allows the designer to view the results at the end of each step to better assess and optimize the design.
+
+![a](https://user-images.githubusercontent.com/22279620/155468084-d33402c7-f9c7-4254-9a68-2763d0bbcb29.PNG)
+
+In order to import all the necessary packages to run the flow, we run the following command:
+
+            package require openlane 0.9
+
+After importing the necessry package, the design that would be run needs to be prepped so as to rund the entire flow successfully.This is achieved by running the command as follows:
+
+            prep -design picorv32a
+ 
+After prepping the design, the next stp would be to run synthesis and technology mapping using *Yosys* and *abc* using the following command:
+ 
+            run_synthesis
+ 
+ After running synthesis, we can go back to the *runs* folder of the design and check the *results/synthesis* folder to see if the synthesized netlist has been generated as shown below:
+ 
+ ![a](https://user-images.githubusercontent.com/22279620/155476272-0682ec42-d8ac-41e3-af49-7b73a9b35a22.PNG)
+
+The timing reports generated after synthesis can be viewed by going to *reports/synthesis* folder as follows:
+
+![a](https://user-images.githubusercontent.com/22279620/155477297-069ec37a-b17b-4fd1-9b52-534d71416f45.PNG)
+
+
