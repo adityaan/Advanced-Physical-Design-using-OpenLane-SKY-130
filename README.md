@@ -25,6 +25,8 @@ This project based workshop will go through the entire Physical Design ASIC flow
     - [Pin Placement and Logical Cell Blockage](#pin)
     - [Floorplanning using OpenLane](#floorlane)
   - [Library Binding and Placement](#placement)
+    - [Cell binding and Placement Overview](#placementover)
+    - [Placement optimization using repeaters](#placeopt)
 - [Day-3 - Designing library cell using Magic layout tool and characterization using ngspice](#day3)
 - [Day-4 - Pre-layout timing analysis and the importance of good clock tree network](#day4)
 - [Day-5 - Final steps of RTL2GDS flow using tritonRoute and openSTA](#day5)
@@ -203,5 +205,19 @@ All the variables that are being set using the floorplan stage can be found in *
 
 ### Library Binding and Placement <a name="placement"></a>
 
+#### - Cell binding and Placement Overview <a name="placementover"></a>
 
-        
+![a](https://user-images.githubusercontent.com/22279620/155799475-4533d3c0-eb35-4c5c-a7e8-7366aed110ae.PNG)
+
+The cells that need to be placed during the placeemnt stage are avaialble as part of the *standard cell library*. The standard cell library conssists of various variants of the the same standard cell which can be used to meet power, performance and area (PPA) requirements. These cells are then placed during the *placement* stage where the cells are placed based on their connectivity to ports and each other as shown below.
+
+![a](https://user-images.githubusercontent.com/22279620/155799938-b14059db-c5d4-4631-bb72-54efc6e5eed3.PNG)
+
+#### - Placement optimization using repeaters<a name="placeopt"></a>
+
+![a](https://user-images.githubusercontent.com/22279620/155801437-2715cc17-eda8-4181-86ad-f8630284459a.PNG)
+
+As shwon in the above image, logic cells that are related to one another may be placed apart as the cells are placed closer to their I/O ports and this may cause a large gap between the cells and could lead to signal integrity issues. To overcome this issue, we could make use of repeaters that could be placed along the path between two related cells as they would make sure that the data that is propagated maintains a good signal strength when delivered at the output.
+
+
+
