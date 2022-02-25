@@ -17,6 +17,14 @@ This project based workshop will go through the entire Physical Design ASIC flow
     - [Overview of OpenLane Directory Structure](#dir)
     - [Running the OpenLane flow](#run)
 - [Day-2 - Good floorplan vs bad floorplan and a brief introduction to library cells](#day2)
+  - [Floorplanning considerations](#floor)
+    - [Utilization factor and Aspect ratio](#util)
+    - [Pre Placed cells](#pre)
+    - [Decoupling Capacitor](#decouple)
+    - [Powerplanning](#powerplan)
+    - [Pin Placement and Logical Cell Blockage](#pin)
+    - [Floorplanning using OpenLane](#floorlane)
+  - [Library Binding and Placement](#placement)
 - [Day-3 - Designing library cell using Magic layout tool and characterization using ngspice](#day3)
 - [Day-4 - Pre-layout timing analysis and the importance of good clock tree network](#day4)
 - [Day-5 - Final steps of RTL2GDS flow using tritonRoute and openSTA](#day5)
@@ -123,3 +131,77 @@ The timing reports generated after synthesis can be viewed by going to *reports/
 ![a](https://user-images.githubusercontent.com/22279620/155477297-069ec37a-b17b-4fd1-9b52-534d71416f45.PNG)
 
 
+## Day-2 - Good floorplan vs bad floorplan and a brief introduction to library cells<a name="day2"></a>
+
+### Floorplanning considerations <a name="floor"></a>
+
+#### - Utilization factor and Aspect ratio <a name="util"></a>
+
+![a](https://user-images.githubusercontent.com/22279620/155614184-7b4bf307-ecc1-4fb3-a96a-fa2946dadd2c.PNG)
+
+When we start out with the floorplanning of the chip, one of the important consideration is to find the optimal height and width values for the core and die area and these values are dependent on many other factors.
+
+![a](https://user-images.githubusercontent.com/22279620/155616145-83d8707c-ce39-4189-9977-e3f4c0ef504e.PNG)
+
+Assuming the above given gate level netlist has to be placed on the chip, in order to calculate the gate area so that it can be placed inside the core area, we can consider individual gates as boxes to be placed inside the core area.
+
+![a](https://user-images.githubusercontent.com/22279620/155619616-d33f2620-ef96-4747-b43e-123bad9dc3ec.PNG)
+
+The boxes can then be placed inside the core area as shown above. In this case, the core area has a *utilization factor* of 100% as it occupies 100% of the core area. The utilization factor can be calculated as follows:
+
+      Utilization factor = (Area occupied by the netlist) / (Total area of the core)
+      
+Similarly, the *apsect ratio* of the chip can be calculated as follows:
+
+      Aspect ratio = (Height of core area) / (Width of core area)
+
+In this case, the aspect ratio would be equal to 1
+
+#### - Pre Placed cells <a name="pre"></a>
+
+![a](https://user-images.githubusercontent.com/22279620/155636895-87035447-c882-4baf-b49f-4d823d1aeced.PNG)
+
+Pre placed cells are special cells or block of IP's that are placed in the core area during the floorplanning stage of the flow. These IP's can be resued across projects and are placed before the placement and routing stages of the flow.
+
+#### - Decoupling Capacitor <a name="decouple"></a>
+
+![a](https://user-images.githubusercontent.com/22279620/155642242-55e894ca-885b-4675-9a5c-ab118222a479.PNG)
+
+When cells are being placed inside the core area, they require power to be supplied to them in order to charge the capacitor at their output. They also need a ground reference when they they to dischage the capacitor. But when the power supplied from the supply travels across long wire to these cells, there is a drop of voltge due to the finite resistance present in the wires. This drop of voltage is not ideal as it could cause the cells to not perform their switching function as intended. In order to solve this issue, decoupling capacitoror *DCAP* cells are placed near to the cells so as to provide power supply to these cells so that they can function as intended. When placed they would appear as shown below.
+
+![a](https://user-images.githubusercontent.com/22279620/155643262-b29d7004-a2fe-43cc-b949-bb0a98098ed3.PNG)
+
+#### - Powerplanning <a name="powerplan"></a>
+
+![a](https://user-images.githubusercontent.com/22279620/155645552-264a4cfc-3538-4f70-b933-2c6302819523.PNG)
+
+Powerplanning is the step of the flow where we make sure that all the cells of the chip receives power as needed. Usually, the power is distrubest as VDD/VSS rings around the chip so as to supply power all aound the chip and then VDD/VSS stripes are used to supply power horizontally and vertically. Typiclly, a mesh structure is used as all the cells across the chip can receive power supply from the nearest power source and this helps to overcome issues of power drop and ground bounce that might occur in a circuit. The mesh structure would look something like the screesnhot below.
+
+![a](https://user-images.githubusercontent.com/22279620/155651141-4f7e090e-1a71-41b7-b41a-2f10bbd7a6ed.PNG)
+
+#### - Pin Placement and Logical Cell Blockage <a name="pin"></a>
+
+![a](https://user-images.githubusercontent.com/22279620/155654687-e7835145-1a42-4143-97fd-16f58d5e009a.PNG)
+
+After powerplanning, we move to the pin placement step where we would place the pins on the chip. Typically, the input pins are placed on the left side of the chip and output pins on the right but this varies from design to design. Also, the clock pins could be placed on either side of the chip and are usually bigger compred to data pins as clocks are distributed across every cell in the design and it needs to have the least resistance path and this is achieved through larger area. Also, logic cell blockages are placed across areas of the chip where the designer would not want cells to be placed during placement and routing.
+
+#### - Floorplanning using OpenLane <a name="floorlane"></a>
+
+![a](https://user-images.githubusercontent.com/22279620/155663430-435a4008-3ef8-4886-96ca-8c67b0c2a486.PNG)
+
+The floorplaning in OpenLane can be run using the following command:
+
+      run_floorplan
+
+All the variables that are being set using the floorplan stage can be found in *openlane/configurations/README.md*. All the parameters that are being set during the floorplanning stage can be found in *openlane/configurations/floorplan.tcl*. The floorplan can be viewed in magic as follows:
+
+      magic -T /home/aditya1697/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic lef read ../../tmp/merged.lef def read picorv32a.floorplan.def &
+     
+![a](https://user-images.githubusercontent.com/22279620/155666500-8b7081e3-d348-4ec0-85d6-f8123dab51ea.PNG)
+
+![a](https://user-images.githubusercontent.com/22279620/155666736-25d78a2b-6e4a-457d-a4a4-178bc964fb69.PNG)
+
+### Library Binding and Placement <a name="placement"></a>
+
+
+        
