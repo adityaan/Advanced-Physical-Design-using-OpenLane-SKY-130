@@ -29,7 +29,7 @@ This project based workshop will go through the entire Physical Design ASIC flow
     - [Placement optimization using repeaters](#placeopt)
 - [Day-3 - Designing library cell using Magic layout tool and characterization using ngspice](#day3)
   - [Library cell design using Magic and ngspice](#libcell)
-    - [Creating SPICE deck](#spice)
+    - [Creating SPICE deck and running simulation](#spice)
     - [CMOS Inverter Layout and](#layout)
 - [Day-4 - Pre-layout timing analysis and the importance of good clock tree network](#day4)
   - [Timing modelling using delay tables](#modelling)
@@ -243,7 +243,7 @@ As shwon in the above image, logic cells that are related to one another may be 
 
 ### Library cell design using Magic and ngspice <a name="libcell"></a>
 
-#### - Creating SPICE deck <a name="spice"></a>
+#### - Creating SPICE deck and running simulation <a name="spice"></a>
 
 ![a](https://user-images.githubusercontent.com/22279620/155860082-6cf9df60-5c22-493e-a621-2f37afc44e56.PNG)
 
@@ -284,11 +284,14 @@ Now, let's trying changing the PMOS width to be twice that of the NMOS width and
 
 As can be seen, the curve is slightly shifted to the left in the first case and more centered aligned in the second case. Also, the point where both the transistors are in saturation region is shifter as well and have different *Vm* voltages.
 
-#### - CMOS Inverter Layout <a name="spice"></a>
+#### - CMOS Inverter Layout and Fabrication Steps <a name="spice"></a>
 
 ![a](https://user-images.githubusercontent.com/22279620/155862471-ea3b31fc-73ab-465b-8d53-c7aa9f4b75e0.PNG)
 
 The above shown image is the layout of a CMOS inverter. Now, we will look into the fabrication steps involved in building such a CMOS inverter.
+
+First, we select a P-substrate with a certain resistivity and doping concentration. Then, we grow silicon dioxide (SiO2) on the P type substrate as it acts as a very good insulator. On top of that, we deposit silicon nitrate and photoresist in order to create a mask.
+Next would be formation of N-well and P-well on the substrate by using Ion implantation. Also, we would need to introduce specific doping impurities to create N-type or P-type on the substrate.We can use more masks and introduce impurities to create the N type and P type transistors and help in the formation of the gate. Some of the other steps that are involved are source and drain formation, local interconnect formation etc.
 
 ## Day-4 - Pre-layout timing analysis and importance of good clock tree <a name="day4"></a>
 
