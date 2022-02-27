@@ -371,3 +371,7 @@ When using real clocks to run STA post CTS, we need to make sure to run the foll
         set_propagated_clock [all_clocks]
         
  
+# Acknowledgements <a name="ack"></a>
+
+- [Kunal Gosh - Co-Founder at VLSI System Design](https://github.com/kunalg123)
+- [Nickson Jose - VLSI System Design](https://github.com/nickson-jose)
