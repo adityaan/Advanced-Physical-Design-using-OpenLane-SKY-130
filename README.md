@@ -46,6 +46,10 @@ This project based workshop will go through the entire Physical Design ASIC flow
   - [Timing Analysis using real clocks](#realclk)
     - [Setup timing analysis using real clocks](#realsetup)
 - [Day-5 - Final steps of RTL2GDS flow using tritonRoute and openSTA](#day5)
+  - [Routing and Design Rule Checks](#drcchecks)
+    - [Introduction to Maze Routing/Lee's algorithm](#leealgo)
+  - [Power Distribution and Introduction to Routing](#powerplan)
+    - [Creating Power distribution in OpenLane](#pdnopen)
 - [Acknowledgements](#ack)
 
 
@@ -370,7 +374,34 @@ When using real clocks to run STA post CTS, we need to make sure to run the foll
 
         set_propagated_clock [all_clocks]
         
- 
+## Day-5 - Final steps of RTL2GDS flow using tritonRoute and openSTA <a name="day5"></a>
+
+### Routing and Design Rule Checks <a name="drcchecks"></a>
+
+#### - Introduction to Maze Routing/Lee's algorithm <a name="leealgo"></a>
+
+![q1](https://user-images.githubusercontent.com/22279620/155892883-5a0a295a-1e2c-4e6a-9100-c5774d86ca97.PNG)
+
+Maze Routing/Lee's algorithm is one  of the many algorithms to find the most effective routing techniques in designs. In this algorithms, the route is defined based on the the number of grids the two blocks/cells that need to be routed are. The tool lays out a routing grid across the design to measure the number of grid blocks. For every grid bloc number *n*, the next grid *n+1* is calculated by numbering the grid that is horizontal and vertical to the current grid. An example of how the algorithm works is shown in the above image.
+
+![q2](https://user-images.githubusercontent.com/22279620/155893579-c385d294-6187-414f-b22f-a72b86a8e44f.PNG)
+
+Design Rule Checks (DRC) are rules that are provided by the pundry along with the PDK that must be met in order for a design to be fabricated on silicon. Some of the common checks are *minimum width*, *minimum spacing* and *minimum pitch* among hundreds of other checks. These rules could be fixed by EDA tools and some need to be fixed manually by the designer.
+
+### Power Distribution and Introduction to Routing <a name="powerplan"></a>
+
+#### - Creating Power distributon using OpenLane <a name="pdnopen"></a>
+
+![q3](https://user-images.githubusercontent.com/22279620/155893591-4bb77089-d522-4cb9-a426-3e1691d16098.PNG)
+
+Once we are done building the clock tree for the design, th next step before routing would be to create the power distribution network for the design. The coomand to run power distribution takes the def file generated post CTS in order to generate the power network among other inputs. The command to generate the power network is as follows:
+
+        gen_pdn
+        
+Once the power distribution is done, we would move onto the last step of the flow which is routing. Routing is process of making sure than the data signals are propgated from start to end point within a given design and most importantly, in a effecient manner. There are two types of routing done is a given design, global routing and detailed routing. TritonRoute does routing in the OpenLane flow. It performs the initial detial route, honors the preprocessed route, checks whether each net satisfies inter-guide connectivity and does panel routing with intra-layer parallel and inter-layer sequential routing framework.
+
+Some of the inputs provided to TritonRoute are LEF, DEF and preprocessed route guide and the output is an optimized routing solution with wire length and via count.
+
 # Acknowledgements <a name="ack"></a>
 
 - [Kunal Gosh - Co-Founder at VLSI System Design](https://github.com/kunalg123)
