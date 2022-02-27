@@ -284,6 +284,12 @@ Now, let's trying changing the PMOS width to be twice that of the NMOS width and
 
 As can be seen, the curve is slightly shifted to the left in the first case and more centered aligned in the second case. Also, the point where both the transistors are in saturation region is shifter as well and have different *Vm* voltages.
 
+![q1](https://user-images.githubusercontent.com/22279620/155901512-6e378cb3-8491-424e-b9e3-9e61373af9a7.PNG)
+
+After creating the SPICE deck as shown above, the inverter simualtion graph would look as shown below and this confirms that the inverter was created correctly in SPICE.
+
+![q1](https://user-images.githubusercontent.com/22279620/155901606-65097f32-f188-498d-a6fd-937bd402a57f.PNG)
+
 #### - CMOS Inverter Layout and Fabrication Steps <a name="spice"></a>
 
 ![a](https://user-images.githubusercontent.com/22279620/155862471-ea3b31fc-73ab-465b-8d53-c7aa9f4b75e0.PNG)
@@ -404,6 +410,12 @@ Once we are done building the clock tree for the design, th next step before rou
 Once the power distribution is done, we would move onto the last step of the flow which is routing. Routing is process of making sure than the data signals are propgated from start to end point within a given design and most importantly, in a effecient manner. There are two types of routing done is a given design, global routing and detailed routing. TritonRoute does routing in the OpenLane flow. It performs the initial detial route, honors the preprocessed route, checks whether each net satisfies inter-guide connectivity and does panel routing with intra-layer parallel and inter-layer sequential routing framework.
 
 Some of the inputs provided to TritonRoute are LEF, DEF and preprocessed route guide and the output is an optimized routing solution with wire length and via count.
+
+For Inter-guide connectivity, two guides are considered to be connected if they are on the same metal layer with touching edges and they are on neighboring metaal layers with a nonzero vertically overlapped area.
+
+![q1](https://user-images.githubusercontent.com/22279620/155901319-03f68fca-1458-45f7-88e9-bf45597ff7f1.PNG)
+
+Above image shows the psuedo code impleemntation of the routing topology optimization algorithm.
 
 # Acknowledgements <a name="ack"></a>
 
