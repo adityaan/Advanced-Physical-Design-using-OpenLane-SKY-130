@@ -28,7 +28,23 @@ This project based workshop will go through the entire Physical Design ASIC flow
     - [Cell binding and Placement Overview](#placementover)
     - [Placement optimization using repeaters](#placeopt)
 - [Day-3 - Designing library cell using Magic layout tool and characterization using ngspice](#day3)
+  - [Library cell design using Magic and ngspice](#libcell)
+    - [Creating SPICE deck](#spice)
+    - [CMOS Inverter Layout and](#layout)
 - [Day-4 - Pre-layout timing analysis and the importance of good clock tree network](#day4)
+  - [Timing modelling using delay tables](#modelling)
+    - [Introduction to timing libs](#timelib)
+    - [Introduction to delay tables](#delaytables)
+  - [Timing analysis using ideal clocks](#idealclocks)
+    - [Setup timing analysis](#setuptime)
+    - [Clock Jitter and Uncertainity](#jitter)
+    - [Calculating slack using OpenSTA post synthesis](#synslack)
+  - [Clock Tree synthesis using TritonCTS and Signal Integrity](#integrity)
+    - [Clock Tree Routing](#clkroute)
+    - [Crosstalk and Clock Net shielding](#cross)
+    - [Run CTS on OpenLane](#runcts)
+  - [Timing Analysis using real clocks](#realclk)
+    - [Setup timing analysis using real clocks](#realsetup)
 - [Day-5 - Final steps of RTL2GDS flow using tritonRoute and openSTA](#day5)
 - [Acknowledgements](#ack)
 
@@ -219,5 +235,139 @@ The cells that need to be placed during the placeemnt stage are avaialble as par
 
 As shwon in the above image, logic cells that are related to one another may be placed apart as the cells are placed closer to their I/O ports and this may cause a large gap between the cells and could lead to signal integrity issues. To overcome this issue, we could make use of repeaters that could be placed along the path between two related cells as they would make sure that the data that is propagated maintains a good signal strength when delivered at the output.
 
+## Day-3 -  Designing library cell using Magic layout tool and characterization using ngspice <a name="day3"></a>
+
+### Library cell design using Magic and ngspice <a name="libcell"></a>
+
+#### - Creating SPICE deck <a name="spice"></a>
+
+![a](https://user-images.githubusercontent.com/22279620/155860082-6cf9df60-5c22-493e-a621-2f37afc44e56.PNG)
+
+The cell design process start with creating the SPICE deck, in this case, for the inverter. This involves identifying the component connectivity, the component values and identifying nodes. In case of the inverter, we first start by writing the SPICE netlist for the PMOS transistor. It can be done as follows:
+
+        M1 out in vdd vdd pmos W=0.375u L=0.25u
+        
+Here, *M1* is the name given to the transistor, *out* is the drain, *in* is the gate, *vdd* substrate, *vdd* source, *pmos* is the transsitor type defined and *W* and *L* is the width and length of the transistor respectively. Similarly, the NMOS transistor can be described as follows:
+
+        M2 out in 0 0 nmos W=0.375u L=0.25u
+        
+The output capacitance, *cload*, is defined a follows:
+
+        cload out 0 10f
+        
+The supply voltage, *Vdd* and the input voltage, *Vin*, is defined as follows:
+
+        Vdd vdd 0 2.5
+        Vin in 0 2.5
+        
+Next, we will be defining some simulation commands to sweep the defined inverter. We will be performing a dc sweep from 0 to 2.5 in steps of 0.05 as follows:
+
+        .op
+        .dc Vin 0 2.5 0.05
+
+Lastly, in order to run this SPICE deck, we need to define the model files. The model files contain all the definitions and technological parameters needed to define the NMOS, PMOS and other parameters of the inverter. They are defined as follows:
+
+        .LIB "tsmc_025um_model.mod" CMOS_MODELS
+        .end
+       
+After running the SPICE simulation using the defined deck, we get the following voltage transfer plot:
+
+![a](https://user-images.githubusercontent.com/22279620/155860800-9e7d1497-2468-4ff5-8b5e-9a88524b6680.PNG)
+
+Now, let's trying changing the PMOS width to be twice that of the NMOS width and sketch the plot
+
+![a](https://user-images.githubusercontent.com/22279620/155860900-3c85f087-7065-4d83-8411-9dc8c0a0c2a2.PNG)
+
+As can be seen, the curve is slightly shifted to the left in the first case and more centered aligned in the second case. Also, the point where both the transistors are in saturation region is shifter as well and have different *Vm* voltages.
+
+#### - CMOS Inverter Layout <a name="spice"></a>
+
+![a](https://user-images.githubusercontent.com/22279620/155862471-ea3b31fc-73ab-465b-8d53-c7aa9f4b75e0.PNG)
+
+The above shown image is the layout of a CMOS inverter. Now, we will look into the fabrication steps involved in building such a CMOS inverter.
+
+## Day-4 - Pre-layout timing analysis and importance of good clock tree <a name="day4"></a>
+
+### Timing modelling using delay tables <a name="modelling"></a>
+
+#### - Introduction to timing libs <a name="timelib"></a>
+
+When we run synthesis of a design, we need to pass certain *timing libs* to the design so that the cells in these libraries can be used by the synthesis tools to meet timing for the design. There are typically three types of timing libs provided, *slow*, *typical* and *fast* timing libs. As the name suggests, these libs contain the necessary cells that can be used in a given design. The files would like in the screenshot below:
+
+![a](https://user-images.githubusercontent.com/22279620/155866371-08b698b1-1e33-4619-8030-b641739d6f22.PNG)
+
+Inside one of these files would look like follows:
+
+![a](https://user-images.githubusercontent.com/22279620/155866459-f3685f1e-0cc5-42fd-a40a-a5da12f5d860.PNG)
+
+These libs files define the timing, power and functionality of all the vrious types of cells. For a given cell, there could be different versions of the cells based on the number of inputs, drive strengths etc. In the section below, the timing tables as seen in the screenshot will be discussed in more detail.
+
+#### - Introduction to delay tables <a name="delaytables"></a>
+
+For each type of cell that is defined inside the *libs*, the delay of the cell is defined as table of two parameters, *input transition* and *output load*. The 2x2 table would have values for different input transition and output capacitance values. These values are defined for *cell rise* and *cell fall*. Also, this would be defined for output transition values as *rise transition* and *fall transition*.
+
+### Timing analysis using ideal clocks <a name="idealclocks"></a>
+
+#### - Setup timing analysis <a name="setuptime"></a>
+
+![a](https://user-images.githubusercontent.com/22279620/155870802-88be4e03-05e0-465b-ac86-fcf8dbc06e2a.PNG)
+
+Setup time can be defined as the minimum amount of time before the active edge of the clock that the data needs to be stable in order for it to be captured at the output correctly. As seen in the above figure, it is the time frame *S* before the capture flop. When we look inside the capture flip-flop, it is impleemnted as two mux's connected to each other. When data *D* is sent to the first mux, it takes time *T* to propagate through the first mux. This can be viewed as the time it takes for the data to reach the center of the flip flop and this time *T* is called the *setup time* of the circuit and is subtracted from the clock period along with combinational flip-flop delay when calculating the frequency.
+
+#### - Clock Jitter and Uncertainity <a name="jitter"></a>
 
 
+![a](https://user-images.githubusercontent.com/22279620/155871573-ab770fbb-e85a-4659-99f6-b9407163874d.PNG)
+
+In a given design, the clock is being generated using a *phase locked loop (PLL)* and they have positive/negative variations associated with them. Due to these variations, the clock does not reach at a given time *T* at a given flip-flop and could reach either before or after T. This period within which the clock edge would reach is known as *clock jitter*. The jitter time frame is the yellow area as shown in the above figure. *Clock Uncertainity* is defined as the combination of clock jitter and setup time and is subtracted from the clock period while calculating the frequency.
+
+#### - Calculating slack using OpenSTA post synthesis <a name="synslack"></a>
+
+We can check the timing of the design post synthesis using OpenSTA as follows:
+
+      sta sta.conf
+
+
+![a](https://user-images.githubusercontent.com/22279620/155872784-ca2d4029-b76d-4e11-bbeb-533f9004e0de.PNG)
+
+The file *sta.conf* is being created to do the timing ananlysis for the design by using the given timing libs, reading the sdc file and finally, using the verilog file.
+
+One way of optimizing the gate level netlist in case the design does not meet timing is as follows:
+
+      set ::env(SYNTH_MAX_FANOUT) 4
+
+Setting the max fanout as 4 or another value could help improve timing of the design and meet slack.
+
+### Clock Tree synthesis using TritonCTS and Signal Integrity <a name="integrity"></a>
+
+#### - Clock Tree Routing <a name="clkroute"></a>
+
+![a](https://user-images.githubusercontent.com/22279620/155873927-3ee3b8f6-be22-4a3f-af88-7459fe7871c9.PNG)
+
+*Clock Tree Synthesis* is the process of reduce the overall skwew and latency of the given design. This is achieved through building a good clock tree and buffering. A *H-tree* is one way of building a clock tree where a net is routed to the center of the design carrying the clock and then it is routed to the next center between two flops until it reduces the skew between two flip-flops. Once this is done, the next step is to place buffers along this path so as to avoid/reduce signal integrity issues with repsect to the clock signals that are being propagated.
+
+#### - Crosstalk and Clock Net shielding <a name="cross"></a>
+
+*Crosstalk* is the phenomenon when two closely routed nets can affect the behavior of the other due to the cross coupling capacitance between them. The coupling capacitance can intoduce glitches and delta delays that could affect the functionaity and timing of the signals that are being propagated. *Shielding* is one method of elimianting the affect of crosstalk as it shields the net from coupling capacitance. Also, it's protects from any unwanted delays which could cause issues related to clock skew.
+
+#### - Running CTS on OpenLane <a name="runcts"></a>
+
+Clock Tree Synthesis can be run in OpenLane as follows:
+
+      run_cts
+      
+### Timing Analysis using real clocks <a name="realclk"></a>
+
+#### - Setup timing analysis using real clocks <a name="realsetup"></a>
+
+![a](https://user-images.githubusercontent.com/22279620/155874956-0cb437a2-b10c-4265-b9d1-33478bafe268.PNG)
+
+When using real clocks, buffers will be placed along the clock path between the launch and capture flip-flop. This would introduce positive or negative skew in the design which could help fix setup or hold time violations in the design.
+
+Hold time is defined as the minimum amout of the time the data needs to be stable after the active edge of the clock so that the data is captured correctly. In cases where there isn't enough combinatioanl logic between flops, the data can change fast and override the previous data causing hold time violation.
+
+When using real clocks to run STA post CTS, we need to make sure to run the following command:
+
+        set_propagated_clock [all_clocks]
+        
+ 
